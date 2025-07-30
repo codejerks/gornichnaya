@@ -14,17 +14,17 @@
 
 ## Структура проекта
 ```
-├── Services/                  # Микросервисы на Python
-│   ├── ai_vs_human_hack/      # Анализ "человек vs ИИ"
-│   ├── curse_check/           # Фильтрация нецензурной лексики
-│   ├── dbService/             # Работа с базой данных
-│   └── spam_check_ml_hack/    # Основной ML-модуль
+├── Services/                   # Микросервисы на Python
+│   ├── ai_vs_human_hack.py     # Анализ "человек vs ИИ"
+│   ├── curse_check.py          # Фильтрация нецензурной лексики
+│   ├── dbService.py            # Работа с базой данных
+│   └── spam_check_ml_hack.py   # Основной ML-модуль
 ├── src/
-│   ├── main/java/             # Java-ядро бота
-│   │   └── App.java           # Точка входа
-│   └── main/resources/        # Конфигурационные файлы
-│       └── config.properties  # Настройки бота
-└── pom.xml                    # Maven-конфигурация
+│   ├── main/java/              # Java-ядро бота
+│   │   └── App.java            # Точка входа
+│   └── main/resources/         # Конфигурационные файлы
+│       └── config.properties   # Настройки бота
+└── pom.xml                     # Maven-конфигурация
 ```
 
 ---
@@ -47,7 +47,7 @@ mvn exec:java -Dexec.mainClass="App"
 Для каждого сервиса в каталоге `Services/`:
 ```bash
 cd Services
-python <service name>.py
+python service_name.py
 ```
 
 ---
