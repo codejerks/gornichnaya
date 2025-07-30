@@ -19,8 +19,8 @@
 │   ├── curse_check.py          # Фильтрация нецензурной лексики
 │   ├── dbService.py            # Работа с базой данных
 │   └── spam_check_ml_hack.py   # Основной ML-модуль
-├── src/
-│   ├── main/java/              # Java-ядро бота
+├── src/main
+│   ├── java.org.example/       # Java-ядро бота
 │   │   └── App.java            # Точка входа
 │   └── main/resources/         # Конфигурационные файлы
 │       └── config.properties   # Настройки бота
