@@ -20,9 +20,9 @@
 │   ├── dbService.py            # Работа с базой данных
 │   └── spam_check_ml_hack.py   # Основной ML-модуль
 ├── src/main
-│   ├── java.org.example/       # Java-ядро бота
+│   ├── java/org/example/       # Java-ядро бота
 │   │   └── App.java            # Точка входа
-│   └── main/resources/         # Конфигурационные файлы
+│   └── resources/         # Конфигурационные файлы
 │       └── config.properties   # Настройки бота
 └── pom.xml                     # Maven-конфигурация
 ```
