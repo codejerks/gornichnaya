@@ -9,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Gateway взаимодействия с микросервисами
  */
-@NoArgsConstructor
 public class ServiceManager {
     private final CurseCheckingService curseCheckingService = new CurseCheckingService();
     private final EasyMLSpamCheckingService easyMLSpamCheckingService = new EasyMLSpamCheckingService();
@@ -17,6 +16,11 @@ public class ServiceManager {
     private final AiCheckingService aiCheckingService = new AiCheckingService();
     private final RedisService redisService = new RedisService();
     private final EroticScamCheckingService eroticScamCheckingService = new EroticScamCheckingService();
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public ServiceManager(){};
 
     /**
      * Обработчик сообщений с помощью микросервисов

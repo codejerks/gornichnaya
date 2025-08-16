@@ -1,13 +1,25 @@
 package org.example;
 
-import org.example.bot.Gornichnaya;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.io.IOException;
 
+import org.example.bot.Gornichnaya;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+
+/**
+ * Точка входа в приложение
+ */
 public class App {
+    /**
+     * Конструктор по умолчанию
+     */
+    public App(){};
+
+    /**
+     * main метод запуска приложения
+     * @param args параметры запуска
+     */
     public static void main(String[] args) {
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
@@ -19,4 +31,5 @@ public class App {
             e.printStackTrace();
         }
     }
+
 }

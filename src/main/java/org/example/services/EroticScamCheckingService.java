@@ -25,6 +25,11 @@ public class EroticScamCheckingService implements MessageChecking {
     );
 
     /**
+     * Конструктор по умолчанию
+     */
+    public EroticScamCheckingService(){};
+
+    /**
      * @param msg проверяемое сообщение
      * @return является ли сообщение допустимым
      */

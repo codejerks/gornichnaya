@@ -1,16 +1,19 @@
 package org.example.bot;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.ServiceLoader;
+
+import org.example.commands.BotCommand;
 import org.example.services.ServiceManager;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * Gornichnaya - класс телеграм-бота, реализующий взаимосвязь с пользователем
@@ -20,6 +23,7 @@ public class Gornichnaya extends TelegramLongPollingBot {
     private final String BOT_USERNAME =
             System.getenv().getOrDefault("BOT_USERNAME", "@gornichnaya_antispam_bot");
     private final ServiceManager serviceManager = new ServiceManager();
+    private final HashMap<String, BotCommand> commands = new HashMap<>();
 
     /**
      * Конструктор класса, инициирующий экземпляр бота
@@ -28,6 +32,7 @@ public class Gornichnaya extends TelegramLongPollingBot {
      */
     public Gornichnaya() throws IOException {
         super(loadToken());
+        registerCommands();
     }
 
     /**
@@ -39,6 +44,12 @@ public class Gornichnaya extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (!update.hasMessage()) { return; }
         Message msg  = update.getMessage();
+        if (msg.isCommand()){
+            String commandIdentifier = msg.getText().split("\\s+")[0];
+            BotCommand command = commands.get(commandIdentifier);
+            if (command != null) command.handle(msg, this, serviceManager);
+            return;
+        }
         serviceManager.processMessage(msg).thenAccept(result->{
             if (!result) {
                 try {
@@ -78,6 +89,21 @@ public class Gornichnaya extends TelegramLongPollingBot {
             }
         } catch (IOException e) {
             throw new RuntimeException("Error loading token", e);
+        }
+    }
+
+    /**
+     * Создает объекты обработчиков команд
+     * <p>
+     *     Инициализирует объекты из классов, перечисленных
+     *     в META-INF/services/org.example.commands.BotCommand
+     * </p>
+     */
+    private void registerCommands(){
+        ServiceLoader<BotCommand> loader = ServiceLoader.load(BotCommand.class);
+        for (BotCommand command : loader) {
+            commands.put(command.getCommandIdentifier(), command);
+            System.out.println("    \u001B[36m"+"Command "+command.getCommandIdentifier()+" was loaded"+"\u001B[0m");
         }
     }
 }
