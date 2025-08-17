@@ -1,14 +1,8 @@
 package org.example.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.concurrent.CompletableFuture;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  * Микросервис взаимодействия с БД
@@ -18,45 +12,18 @@ import java.util.concurrent.CompletableFuture;
  */
 public class DBService {
 
-    private final HttpClient client = HttpClient
-            .newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)   // <-- ключевая строка
-            .build();
+    private final String url;
+    private final String user;
+    private final String password;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    private final String endpoint =
-            System.getenv().getOrDefault("MICROSERVICE_URL",
-                    "http://localhost:8000/items");
-
-
-    public CompletableFuture<Double> userId(Long userId) throws IOException {
-
-        String json = mapper.writeValueAsString(userId); // пакуем пэйлод в джейсон
-        // отправляем локально на сервере к нашему микросервису
-        String url = endpoint + "/" + userId;
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-// получаем ответ от сервера в виде числа например
-        return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .thenApply(this::extractResult);
+    public DBService() {
+        this.url = "jdbc:postgresql://localhost:5433/tg_bot";
+        this.user = "postgres";
+        this.password = "0707";
     }
 
-    // метод извлечения числа
-    private Double extractResult(String body) {
-        try {
-            JsonNode root = mapper.readTree(body);
-            if (root.has("id")) {
-                System.out.println(root.get("id").asDouble());
-                return root.get("id").asDouble();
-            }
-            throw new IllegalStateException("No 'id' field in response: " + body);
-        } catch (IOException e) {
-            throw new RuntimeException("Can't parse microservice response: " + body, e);
-        }
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 }
 

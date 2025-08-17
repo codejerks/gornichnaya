@@ -1,26 +1,30 @@
 package org.example.services;
 
-import lombok.NoArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Gateway взаимодействия с микросервисами
  */
 public class ServiceManager {
-    private final CurseCheckingService curseCheckingService = new CurseCheckingService();
-    private final EasyMLSpamCheckingService easyMLSpamCheckingService = new EasyMLSpamCheckingService();
+    Properties prop = loadProperties();
+    private final CurseCheckingService curseCheckingService = new CurseCheckingService(prop.getProperty("curse.url"));
+    private final EasyMLSpamCheckingService easyMLSpamCheckingService = new EasyMLSpamCheckingService(prop.getProperty("mlspam.url"));
     private final DBService dbService = new DBService();
-    private final AiCheckingService aiCheckingService = new AiCheckingService();
-    private final RedisService redisService = new RedisService();
+    private final AiCheckingService aiCheckingService = new AiCheckingService(prop.getProperty("ai.url"));
+    private final RedisService redisService = new RedisService(prop.getProperty("redis.host"), prop.getProperty("redis.port"));
     private final EroticScamCheckingService eroticScamCheckingService = new EroticScamCheckingService();
 
     /**
      * Конструктор по умолчанию
      */
-    public ServiceManager(){};
+    public ServiceManager(){}
 
     /**
      * Обработчик сообщений с помощью микросервисов
@@ -63,4 +67,19 @@ public class ServiceManager {
         }
         return result;
     }
+    private static Properties loadProperties() {
+        try {
+            Properties prop = new Properties();
+            try (InputStream input = ServiceManager.class.getClassLoader().getResourceAsStream("config.properties")) {
+                if (input == null) {
+                    throw new FileNotFoundException("config.properties not found, check resources");
+                }
+                prop.load(input);
+                return prop;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading properties", e);
+        }
+    }
 }
+

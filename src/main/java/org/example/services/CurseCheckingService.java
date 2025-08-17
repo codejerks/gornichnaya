@@ -13,9 +13,9 @@ public class CurseCheckingService extends ConnectionRequired implements MessageC
     /**
      * Конструктор сервиса
      */
-    public CurseCheckingService() {
+    public CurseCheckingService(String property) {
         super(System.getenv().getOrDefault("MICROSERVICE_URL",
-                "http://127.0.0.1:8075/check_curses"));
+                property));
     }
 
     /**

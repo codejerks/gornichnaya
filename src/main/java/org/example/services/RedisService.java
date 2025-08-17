@@ -18,7 +18,7 @@ public class RedisService implements MessageChecking {
     private final JedisPool pool;
     private static final int TTL_SECONDS = 3600; // время жизни ключа – 1 час
 
-    public RedisService() {
+    public RedisService(String property, String propProperty) {
         String host = System.getenv().getOrDefault("REDIS_HOST", "localhost");
         int port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
         this.pool = new JedisPool(host, port);
