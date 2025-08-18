@@ -57,8 +57,10 @@ public class StartCommand extends BotCommand {
 
         Long chatId = msg.getChatId();
         Long userId = msg.getFrom().getId();
-
+        String userName = msg.getFrom().getUserName();
+        serviceManager.addUserToDB(userId, userName);
         serviceManager.addUserChatToDB(chatId, "Этот чат", userId);
         sendMessage(chatId, messageText, List.of(keyboardRow), bot);
+
     }
 }

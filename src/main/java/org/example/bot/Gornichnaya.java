@@ -57,6 +57,14 @@ public class Gornichnaya extends TelegramLongPollingBot {
                 serviceManager.addUserChatToDB(msg.getChatId(), msg.getChat().getTitle(), msg.getFrom().getId());
             }
 
+            if (msg.getLeftChatMember().getUserName().equals(getBotUsername())){
+                System.out.println("\u001B[32m"+
+                        msg.getFrom().getUserName()+
+                        " deleted bot from "+msg.getChat().getTitle()+
+                        "\u001B[0m");
+                serviceManager.removeChat(msg.getChatId());
+            }
+
 
             if (!msg.hasText()) {
                 return;

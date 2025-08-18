@@ -3,6 +3,7 @@ package org.example.services;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Properties;
@@ -18,46 +19,83 @@ public class ServiceManager {
     private final HashMap<String, MessageChecking> allowedServices = new HashMap<>();
 
     /// Позже убрать
-    private final FakeDBService dbService = new FakeDBService();
-
+    private final DBService dbService = new DBService();
+    private final ChannelService channelService = new ChannelService(dbService);
     /**
      * Конструктор по умолчанию
      */
     public ServiceManager(){
         registerServices();
-    };
-
-    public HashMap<Long, String> getChatsFromDB(long userId){
-        return dbService.getChatsByUserId(userId);
     }
 
+    public HashMap<Long, String> getChatsFromDB(long userId) {
+        try {
+            return channelService.getChatsByUserId(userId);
+        }
+        catch (SQLException e){
+            System.err.println(e);
+        }
+        return null;
+    }
+    public void removeChat(long chatId){
+        try {
+            channelService.removeChat(chatId);
+        } catch (SQLException e) {
+            System.err.println(e);
+        }
+    }
+    public void addUserToDB(long userId, String userName){
+        try {
+            channelService.addUser(userId, userName);
+        } catch (SQLException e) {
+            System.err.println(e);
+        }
+    }
     public void addUserChatToDB(long chatId, String chatName, long userId){
-        dbService.addChatForUser(chatId, chatName, userId);
+        try {
+            channelService.addChatForUser(chatId, chatName, userId);
+        }
+        catch (SQLException e){
+            System.err.println(e);
+        }
     }
 
     public HashMap<MessageChecking, Boolean> getChatSettingsFromDB(long chatId){
-        HashMap<String, Boolean> identifierToBoolMap = dbService.getChatSettings(chatId);
+        try {
+            HashMap<String, Boolean> identifierToBoolMap = channelService.getChatSettings(chatId);
 
-        HashMap<MessageChecking, Boolean> chatSettings = new HashMap<>();
-        identifierToBoolMap.forEach((k, v) -> {
-            MessageChecking checker = allowedServices.get(k);
-            if (checker != null) chatSettings.put(checker, v);
-        });
+            HashMap<MessageChecking, Boolean> chatSettings = new HashMap<>();
+            identifierToBoolMap.forEach((k, v) -> {
+                MessageChecking checker = allowedServices.get(k);
+                if (checker != null) chatSettings.put(checker, v);
+            });
 
-        return chatSettings;
+            return chatSettings;
+        }
+        catch (SQLException e){
+            System.err.println(e);
+        }
+
+        return null;
     }
 
     public HashMap<MessageChecking, Boolean> changeChatSettingInDB(long chatId, String settingToChange){
-        dbService.changeChatSetting(chatId, settingToChange);
-        HashMap<String, Boolean> identifierToBoolMap = dbService.getChatSettings(chatId);
+        try{
+            channelService.changeChatSetting(chatId, settingToChange);
+            HashMap<String, Boolean> identifierToBoolMap = channelService.getChatSettings(chatId);
 
-        HashMap<MessageChecking, Boolean> chatSettings = new HashMap<>();
-        identifierToBoolMap.forEach((k, v) -> {
-            MessageChecking checker = allowedServices.get(k);
-            if (checker != null) chatSettings.put(checker, v);
-        });
+            HashMap<MessageChecking, Boolean> chatSettings = new HashMap<>();
+            identifierToBoolMap.forEach((k, v) -> {
+                MessageChecking checker = allowedServices.get(k);
+                if (checker != null) chatSettings.put(checker, v);
+            });
 
-        return chatSettings;
+            return chatSettings;
+        }
+        catch (SQLException e){
+            System.err.println(e);
+        }
+        return null;
     }
 
     /**
