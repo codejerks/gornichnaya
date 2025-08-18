@@ -1,8 +1,8 @@
 package org.example.services;
 
-import org.telegram.telegrambots.meta.api.objects.Message;
-
 import java.util.concurrent.CompletableFuture;
+
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 /**
  * Взаимодействие с микросервисом проверки на языковую модель

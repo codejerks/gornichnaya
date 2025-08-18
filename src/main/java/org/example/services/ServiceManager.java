@@ -3,14 +3,13 @@ package org.example.services;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.example.commands.BotCommand;
-import org.telegram.telegrambots.meta.api.objects.Message;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 
-import org.apache.http.conn.ConnectionRequest;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 /**
  * Gateway взаимодействия с микросервисами

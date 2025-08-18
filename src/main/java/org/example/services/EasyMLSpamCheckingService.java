@@ -1,15 +1,8 @@
 package org.example.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.telegram.telegrambots.meta.api.objects.Message;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
+
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 /**
  * Взаимодействие с микросервисом легкой проверки на спам с помощью ML
