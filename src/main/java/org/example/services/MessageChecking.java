@@ -8,6 +8,19 @@ import java.util.concurrent.CompletableFuture;
  * Интерфейс для классов, проверяющих сообщение на корректность
  */
 public interface MessageChecking {
+
+    /**
+     * Возвращает название checker-а
+     * @return String имя сервиса
+     */
+    public String getName();
+
+    /**
+     * Возвращает идентификатор checker-а
+     * @return String идентификатор
+     */
+    public String getIdentifier();
+
     /**
      * Функция проверки сообщения на корректность
      *

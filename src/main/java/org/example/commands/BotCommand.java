@@ -3,9 +3,19 @@ package org.example.commands;
 import org.example.services.ServiceManager;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static java.lang.Math.toIntExact;
 
 /**
  * Абстрактный класс обработчика команд бота
@@ -21,7 +31,17 @@ public abstract class BotCommand {
      * Геттер идентификатора команды вида <b>/some_command</b>
      * @return String идентификатор команды
      */
-    public abstract String getCommandIdentifier();
+    public String getCommandIdentifier(){ return null; };
+
+    /**
+     * Проверка удовлетворительной конфигурации callback
+     *
+     * <p>Возвращает false, если не переопределен (подразумевая, что команда не обрабатывает callback)</p>
+     * @return true|false результат проверски
+     */
+    public boolean isCallbackConfiguration(String configuration){
+        return false;
+    };
 
     /**
      * Обработчик команды
@@ -31,39 +51,71 @@ public abstract class BotCommand {
      * @param serviceManager объект класса serviceManager, нужен в случае необходимости связи с сервисами
      *                       (например, обновление настроек в базе данных)
      */
-    public abstract void handle(Message msg, TelegramLongPollingBot bot, ServiceManager serviceManager);
+    public void handleCommand(Message msg, TelegramLongPollingBot bot, ServiceManager serviceManager){};
 
     /**
-     * Отправляет сообщение в чат с ботом
-     * @param msg сообщение, вызвавшее команду
-     * @param bot объект класса бота
-     * @param text текстовое сообщение
+     * Обработчик callback
+     *
+     * @param callbackQuery - объект CallbackQuery, содержащий информацию о вызванном callback
+     * @param bot объект класса бота, нужен для отправки текста в ответ на вызов команды, если требуется
+     * @param serviceManager объект класса serviceManager, нужен в случае необходимости связи с сервисами
+     *                       (например, обновление настроек в базе данных)
      */
-    protected void sendMessage(Message msg, TelegramLongPollingBot bot, String text) {
-        Long chatId = getChatId(msg);
-        SendMessage message = new SendMessage(String.valueOf(chatId), text);
+    public void handleCallback(CallbackQuery callbackQuery, TelegramLongPollingBot bot, ServiceManager serviceManager){}
+
+    protected boolean sendMessage(long chatId,
+                                  String messageText,
+                                  List<List<InlineKeyboardButton>> keyboard,
+                                  TelegramLongPollingBot bot){
+        SendMessage message = SendMessage
+                .builder()
+                .chatId(chatId)
+                .text(messageText)
+                .parseMode("Markdown")
+                .replyMarkup(InlineKeyboardMarkup
+                        .builder()
+                        .keyboard(keyboard)
+                        .build()
+                ).build();
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
-            throw new RuntimeException("Failed to send message", e);
-        }
+            e.printStackTrace();
+            return false;
+        };
+        return true;
+    }
+
+    protected boolean editMessage(long chatId,
+                                  long messageId,
+                                  String messageText,
+                                  List<List<InlineKeyboardButton>> keyboard,
+                                  TelegramLongPollingBot bot){
+        EditMessageText new_message = EditMessageText.builder()
+                .chatId(chatId)
+                .messageId(toIntExact(messageId))
+                .text(messageText)
+                .parseMode("HTML")
+                .replyMarkup(InlineKeyboardMarkup
+                        .builder()
+                        .keyboard(keyboard)
+                        .build()
+                ).build();
+        try {
+            bot.execute(new_message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            return false;
+        };
+        return true;
     }
 
     /**
-     * Возвращает имя пользователя сообщения внутри обновления
-     * @param msg объект класса Message, содержащий информацию об отправленном сообщении
-     * @return String имя пользователя
+     * Проверяет, что обновление пришло из приватного чата
+     *
+     * @param msg Объект сообщения
      */
-    protected String getUserName(Message msg) {
-        return msg.getFrom().getUserName();
-    }
-
-    /**
-     * Возвразает идентификатор чата, куда было отправлено сообщение
-     * @param msg объект класса Message, содержащий информацию об отправленном сообщении
-     * @return Long идентификатор чата
-     */
-    protected Long getChatId(Message msg) {
-        return msg.getChatId();
+    protected boolean isPrivateChat(Message msg) {
+        return "private".equals(msg.getChat().getType());
     }
 }

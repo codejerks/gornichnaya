@@ -1,1 +1,5 @@
 org.example.commands.StartCommand
+org.example.commands.MenuCommand
+org.example.commands.SettingsCommand
+org.example.commands.HelpCommand
+org.example.commands.ChatSettingsCommand

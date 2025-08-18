@@ -29,6 +29,16 @@ public class EroticScamCheckingService implements MessageChecking {
      */
     public EroticScamCheckingService(){};
 
+    @Override
+    public String getName() {
+        return "Фильтр взрослого контента";
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "erotic-scam";
+    }
+
     /**
      * @param msg проверяемое сообщение
      * @return является ли сообщение допустимым

@@ -11,9 +11,13 @@ import org.example.commands.BotCommand;
 import org.example.services.ServiceManager;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import static java.lang.Math.toIntExact;
 
 /**
  * Gornichnaya - класс телеграм-бота, реализующий взаимосвязь с пользователем
@@ -21,7 +25,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Gornichnaya extends TelegramLongPollingBot {
     private final String BOT_USERNAME =
-            System.getenv().getOrDefault("BOT_USERNAME", "@gornichnaya_antispam_bot");
+            System.getenv().getOrDefault("BOT_USERNAME", "gornichnaya_antispam_bot");
     private final ServiceManager serviceManager = new ServiceManager();
     private final HashMap<String, BotCommand> commands = new HashMap<>();
 
@@ -42,24 +46,51 @@ public class Gornichnaya extends TelegramLongPollingBot {
      */
     @Override
     public void onUpdateReceived(Update update) {
-        if (!update.hasMessage()) { return; }
-        Message msg  = update.getMessage();
-        if (msg.isCommand()){
-            String commandIdentifier = msg.getText().split("\\s+")[0];
-            BotCommand command = commands.get(commandIdentifier);
-            if (command != null) command.handle(msg, this, serviceManager);
-            return;
-        }
-        serviceManager.processMessage(msg).thenAccept(result->{
-            if (!result) {
-                try {
-                    execute(new DeleteMessage(msg.getChatId().toString(), msg.getMessageId()));
-                    System.out.println("\u001B[36m"+"The message has been deleted"+"\u001B[0m");
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
+        if (update.hasMessage()) {
+            Message msg = update.getMessage();
+
+            if (msg.getNewChatMembers().stream().anyMatch((user)->user.getUserName().equals(this.getBotUsername()))){
+                System.out.println("\u001B[32m"+
+                        msg.getFrom().getUserName()+
+                        " added bot to "+msg.getChat().getTitle()+
+                        "\u001B[0m");
+                serviceManager.addUserChatToDB(msg.getChatId(), msg.getChat().getTitle(), msg.getFrom().getId());
             }
-        });
+
+
+            if (!msg.hasText()) {
+                return;
+            }
+            if (msg.isCommand()) {
+                String commandIdentifier = msg.getText().split("\\s+")[0];
+                BotCommand command = commands.get(commandIdentifier);
+                if (command != null) command.handleCommand(msg, this, serviceManager);
+                return;
+            }
+            serviceManager.processMessage(msg).thenAccept(result -> {
+                if (!result) {
+                    try {
+                        execute(new DeleteMessage(msg.getChatId().toString(), msg.getMessageId()));
+                        System.out.println("\u001B[36m" + "The message has been deleted" + "\u001B[0m");
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } else if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            String callData = callbackQuery.getData();
+
+            String commandIdentifier = callData
+                    .split("\\s+")[0]
+                    .split("_")[0];
+            BotCommand command = commands.get(commandIdentifier);
+
+            if (command == null) return;
+            if (! command.isCallbackConfiguration(callData)) return;
+
+            command.handleCallback(callbackQuery, this, serviceManager);
+        }
     }
 
     /**

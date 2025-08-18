@@ -1,0 +1,4 @@
+org.example.services.AiCheckingService
+org.example.services.CurseCheckingService
+org.example.services.EasyMLSpamCheckingService
+org.example.services.EroticScamCheckingService

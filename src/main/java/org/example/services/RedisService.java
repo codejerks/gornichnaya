@@ -55,6 +55,16 @@ public class RedisService implements MessageChecking {
         return "user:" + value.toString();
     }
 
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return null;
+    }
+
     /**
      * Заглушка
      *

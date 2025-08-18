@@ -18,6 +18,16 @@ public class CurseCheckingService extends ConnectionRequired implements MessageC
                 "http://127.0.0.1:8075/check_curses"));
     }
 
+    @Override
+    public String getName() {
+        return "Фильтр мата";
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "curse-checking";
+    }
+
     /**
      * @param msg проверяемое сообщение
      * @return является ли сообщение допустимым

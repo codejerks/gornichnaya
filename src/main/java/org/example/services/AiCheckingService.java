@@ -17,6 +17,16 @@ public class AiCheckingService extends ConnectionRequired implements MessageChec
                 "AI_MICROSERVICE_URL", "http://127.0.0.1:8060/check_ai"));
     }
 
+    @Override
+    public String getName() {
+        return "Фильтр нейросетевого спама";
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "ai-vs-human";
+    }
+
     /**
      * @param msg проверяемое сообщение
      * @return является ли сообщение допустимым

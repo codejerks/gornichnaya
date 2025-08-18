@@ -24,6 +24,16 @@ public class EasyMLSpamCheckingService extends ConnectionRequired implements Mes
                 "http://127.0.0.1:8055/check_spam_ml"));
     }
 
+    @Override
+    public String getName() {
+        return "ML-фильтр спама";
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "easy-ml-checking";
+    }
+
     /**
      * @param msg проверяемое сообщение
      * @return является ли сообщение допустимым

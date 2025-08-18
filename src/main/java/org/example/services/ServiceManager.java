@@ -1,26 +1,60 @@
 package org.example.services;
 
 import lombok.NoArgsConstructor;
+import org.example.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Gateway взаимодействия с микросервисами
  */
 public class ServiceManager {
-    private final CurseCheckingService curseCheckingService = new CurseCheckingService();
-    private final EasyMLSpamCheckingService easyMLSpamCheckingService = new EasyMLSpamCheckingService();
-    private final DBService dbService = new DBService();
-    private final AiCheckingService aiCheckingService = new AiCheckingService();
-    private final RedisService redisService = new RedisService();
-    private final EroticScamCheckingService eroticScamCheckingService = new EroticScamCheckingService();
+    private final HashMap<String, MessageChecking> allowedServices = new HashMap<>();
+
+    /// Позже убрать
+    private final FakeDBService dbService = new FakeDBService();
 
     /**
      * Конструктор по умолчанию
      */
-    public ServiceManager(){};
+    public ServiceManager(){
+        registerServices();
+    };
+
+    public HashMap<Long, String> getChatsFromDB(long userId){
+        return dbService.getChatsByUserId(userId);
+    }
+
+    public void addUserChatToDB(long chatId, String chatName, long userId){
+        dbService.addChatForUser(chatId, chatName, userId);
+    }
+
+    public HashMap<MessageChecking, Boolean> getChatSettingsFromDB(long chatId){
+        HashMap<String, Boolean> identifierToBoolMap = dbService.getChatSettings(chatId);
+
+        HashMap<MessageChecking, Boolean> chatSettings = new HashMap<>();
+        identifierToBoolMap.forEach((k, v) -> {
+            MessageChecking checker = allowedServices.get(k);
+            if (checker != null) chatSettings.put(checker, v);
+        });
+
+        return chatSettings;
+    }
+
+    public HashMap<MessageChecking, Boolean> changeChatSettingInDB(long chatId, String settingToChange){
+        dbService.changeChatSetting(chatId, settingToChange);
+        HashMap<String, Boolean> identifierToBoolMap = dbService.getChatSettings(chatId);
+
+        HashMap<MessageChecking, Boolean> chatSettings = new HashMap<>();
+        identifierToBoolMap.forEach((k, v) -> {
+            MessageChecking checker = allowedServices.get(k);
+            if (checker != null) chatSettings.put(checker, v);
+        });
+
+        return chatSettings;
+    }
 
     /**
      * Обработчик сообщений с помощью микросервисов
@@ -33,11 +67,7 @@ public class ServiceManager {
 
         // Массив необходимых проверок; после добавления кастомизации проверки
         // чата можно будет получать его отдельным методом по информации из БД
-        ArrayList<MessageChecking> checkers = new ArrayList<>();
-        checkers.add(eroticScamCheckingService);
-        checkers.add(curseCheckingService);
-        checkers.add(easyMLSpamCheckingService);
-        checkers.add(aiCheckingService);
+        Collection<MessageChecking> checkers = allowedServices.values();
 
         // Цикл проверки каждым checker-ом
         for (MessageChecking checker : checkers) {
@@ -62,5 +92,20 @@ public class ServiceManager {
             });
         }
         return result;
+    }
+
+    /**
+     * Создает объекты сервисов
+     * <p>
+     *     Инициализирует объекты из классов, перечисленных
+     *     в META-INF/services/org.example.services.MessageChecking
+     * </p>
+     */
+    private void registerServices(){
+        ServiceLoader<MessageChecking> loader = ServiceLoader.load(MessageChecking.class);
+        for (MessageChecking service : loader) {
+            allowedServices.put(service.getIdentifier(), service);
+            System.out.println("    \u001B[36m"+"Service "+service.getIdentifier()+" was loaded"+"\u001B[0m");
+        }
     }
 }
