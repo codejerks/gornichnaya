@@ -16,14 +16,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class EasyMLSpamCheckingService extends ConnectionRequired implements MessageChecking {
 
-    /**
-     * Конструктор сервиса
-     */
-    public EasyMLSpamCheckingService() {
-        super(System.getenv().getOrDefault("MICROSERVICE_URL",
-                "http://127.0.0.1:8055/check_spam_ml"));
-    }
-
     @Override
     public String getName() {
         return "ML-фильтр спама";

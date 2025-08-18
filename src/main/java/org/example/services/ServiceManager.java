@@ -1,11 +1,16 @@
 package org.example.services;
 
-import lombok.NoArgsConstructor;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.example.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+
+import org.apache.http.conn.ConnectionRequest;
 
 /**
  * Gateway взаимодействия с микросервисами
@@ -103,9 +108,32 @@ public class ServiceManager {
      */
     private void registerServices(){
         ServiceLoader<MessageChecking> loader = ServiceLoader.load(MessageChecking.class);
+        Properties prop = loadProperties();
+
         for (MessageChecking service : loader) {
             allowedServices.put(service.getIdentifier(), service);
             System.out.println("    \u001B[36m"+"Service "+service.getIdentifier()+" was loaded"+"\u001B[0m");
+
+            if (service instanceof ConnectionRequired connectionRequired){
+                String endpoint = prop.getProperty(service.getIdentifier()+".url");
+                connectionRequired.setEndpoint(endpoint);
+                System.out.println("    \u001B[36m"+"Set endpoint for "+service.getIdentifier()+": \""+endpoint+"\"");
+            }
+        }
+    }
+
+    private static Properties loadProperties() {
+        try {
+            Properties prop = new Properties();
+            try (InputStream input = ServiceManager.class.getClassLoader().getResourceAsStream("config.properties")) {
+                if (input == null) {
+                    throw new FileNotFoundException("config.properties not found, check resources");
+                }
+                prop.load(input);
+                return prop;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading properties", e);
         }
     }
 }

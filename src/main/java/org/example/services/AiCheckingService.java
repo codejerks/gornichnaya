@@ -9,14 +9,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class AiCheckingService extends ConnectionRequired implements MessageChecking {
 
-    /**
-     * Конструктор сервиса
-     */
-    public AiCheckingService() {
-        super(System.getenv().getOrDefault(
-                "AI_MICROSERVICE_URL", "http://127.0.0.1:8060/check_ai"));
-    }
-
     @Override
     public String getName() {
         return "Фильтр нейросетевого спама";

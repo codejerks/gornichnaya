@@ -21,11 +21,23 @@ public abstract class ConnectionRequired {
     private String endpoint;
 
     /**
+     * Конструктор без аргументов
+     */
+    public ConnectionRequired(){}
+
+    /**
      * Конструктор с заданием точки подключения
      *
      * @param endpoint - строка с адресом подключения
      */
     public ConnectionRequired(String endpoint){
+        this.endpoint = endpoint;
+    }
+
+    /**
+     * Задать адрес подключения
+     */
+    public void setEndpoint(String endpoint){
         this.endpoint = endpoint;
     }
 

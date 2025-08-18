@@ -22,7 +22,7 @@
 ├── src/main
 │   ├── java/org/example/       # Java-ядро бота
 │   │   └── App.java            # Точка входа
-│   └── resources/         # Конфигурационные файлы
+│   └── resources/              # Конфигурационные файлы
 │       └── config.properties   # Настройки бота
 └── pom.xml                     # Maven-конфигурация
 ```

@@ -10,14 +10,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class CurseCheckingService extends ConnectionRequired implements MessageChecking {
 
-    /**
-     * Конструктор сервиса
-     */
-    public CurseCheckingService() {
-        super(System.getenv().getOrDefault("MICROSERVICE_URL",
-                "http://127.0.0.1:8075/check_curses"));
-    }
-
     @Override
     public String getName() {
         return "Фильтр мата";
